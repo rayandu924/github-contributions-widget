@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Contributions</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      color: #c9d1d9; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
+    }
+    .state { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; width: 100%; height: 100%; }
+    .state.active { display: flex; }
+    .state-icon { font-size: 48px; }
+    .state-title { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+    .state-message { font-size: 14px; color: #8b949e; max-width: 300px; }
+    .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: #238636; color: #fff; }
+    .btn-primary:hover { background: #2ea043; }
+    .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+    .btn-secondary:hover { background: #30363d; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #30363d; border-top-color: #238636; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .container { display: none; flex-direction: column; gap: 12px; padding: 16px; width: 100%; height: 100%; }
+    .container.active { display: flex; }
+    .background-layer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #30363d; }
+    .username { font-weight: 600; font-size: 14px; color: #f0f6fc; }
+    .year-label { font-size: 12px; color: #8b949e; }
+    .stats { display: flex; gap: 16px; flex-wrap: wrap; }
+    .stat { display: flex; align-items: baseline; gap: 4px; }
+    .stat-value { font-size: 16px; font-weight: 700; color: #f0f6fc; }
+    .stat-label { font-size: 12px; color: #8b949e; }
+    .graph-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .graph-container { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; padding: 4px; }
+    .graph-container::-webkit-scrollbar { height: 6px; }
+    .graph-container::-webkit-scrollbar-track { background: #21262d; border-radius: 3px; }
+    .graph-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+    .day-labels { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 0 0 0; font-size: 10px; color: #8b949e; min-width: 28px; }
+    .day-label { height: var(--cell-size, 12px); display: flex; align-items: center; }
+    .day-label:nth-child(even) { visibility: hidden; }
+    .graph { display: flex; gap: var(--cell-gap, 3px); }
+    .week { display: flex; flex-direction: column; gap: var(--cell-gap, 3px); }
+    .week-header { height: 16px; font-size: 10px; color: #8b949e; text-align: center; white-space: nowrap; }
+    .day { width: var(--cell-size, 12px); height: var(--cell-size, 12px); border-radius: var(--cell-radius, 2px); background: var(--level-0, #161b22); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; position: relative; }
+    .day:hover { transform: scale(1.2); box-shadow: 0 0 8px rgba(255,255,255,0.2); z-index: 10; }
+    .day.level-0 { background: var(--level-0); }
+    .day.level-1 { background: var(--level-1); }
+    .day.level-2 { background: var(--level-2); }
+    .day.level-3 { background: var(--level-3); }
+    .day.level-4 { background: var(--level-4); }
+    .tooltip { display: none; position: fixed; padding: 8px 12px; background: #1c2128; border: 1px solid #30363d; border-radius: 6px; font-size: 12px; color: #f0f6fc; pointer-events: none; z-index: 1000; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .tooltip.visible { display: block; }
+    .tooltip-count { font-weight: 700; }
+    .tooltip-date { color: #8b949e; margin-left: 4px; }
+    .legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #8b949e; margin-top: auto; padding-top: 8px; }
+    .legend-squares { display: flex; gap: 3px; }
+    .legend-square { width: 10px; height: 10px; border-radius: 2px; }
+    .theme-github-green { --level-0: #161b22; --level-1: #0e4429; --level-2: #006d32; --level-3: #26a641; --level-4: #39d353; }
+    .theme-github-dark { --level-0: #161b22; --level-1: #1e3a2f; --level-2: #2d5a44; --level-3: #3d7a59; --level-4: #4d9a6e; }
+    .theme-blue { --level-0: #161b22; --level-1: #0a3069; --level-2: #0550ae; --level-3: #0969da; --level-4: #54aeff; }
+    .theme-purple { --level-0: #161b22; --level-1: #3d1a5c; --level-2: #6e40aa; --level-3: #9d4edd; --level-4: #c77dff; }
+    .theme-orange { --level-0: #161b22; --level-1: #5c2d0e; --level-2: #9a4a1c; --level-3: #d4682a; --level-4: #ff9f43; }
+    .theme-pink { --level-0: #161b22; --level-1: #5c1a3d; --level-2: #9a2d66; --level-3: #d44190; --level-4: #ff6eb4; }
+    .error-icon { color: #f85149; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .container.active { animation: fadeIn 0.3s ease-out; }
+    .day { animation: fadeIn 0.2s ease-out backwards; }
+  </style>
+</head>
+<body>
+  <div class="background-layer" id="background"></div>
+  <div class="state" id="state-auth">
+    <div class="state-icon">🔐</div>
+    <div class="state-title">GitHub Authentication Required</div>
+    <div class="state-message">Connect your GitHub account to display your contribution graph.</div>
+    <button class="btn btn-primary" id="btn-connect">Connect GitHub</button>
+  </div>
+  <div class="state" id="state-scope">
+    <div class="state-icon">🔑</div>
+    <div class="state-title">Additional Permissions Needed</div>
+    <div class="state-message">This widget needs permission to read your GitHub profile and contributions.</div>
+    <button class="btn btn-primary" id="btn-scope">Grant Permissions</button>
+  </div>
+  <div class="state" id="state-loading">
+    <div class="spinner"></div>
+    <div class="state-title">Loading contributions...</div>
+    <div class="state-message" id="loading-message">Fetching your GitHub data</div>
+  </div>
+  <div class="state" id="state-error">
+    <div class="state-icon error-icon">⚠️</div>
+    <div class="state-title" id="error-title">Something went wrong</div>
+    <div class="state-message" id="error-message">Unable to load contribution data.</div>
+    <button class="btn btn-secondary" id="btn-retry">Retry</button>
+  </div>
+  <div class="container" id="container">
+    <div class="header">
+      <div class="user-info">
+        <img class="avatar" id="avatar" src="" alt="Avatar">
+        <div>
+          <div class="username" id="username">Loading...</div>
+          <div class="year-label" id="year-label">2024</div>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="graph-wrapper">
+      <div class="graph-container">
+        <div class="day-labels" id="day-labels"></div>
+        <div class="graph" id="graph"></div>
+      </div>
+    </div>
+    <div class="legend" id="legend">
+      <span>Less</span>
+      <div class="legend-squares" id="legend-squares"></div>
+      <span>More</span>
+    </div>
+  </div>
+  <div class="tooltip" id="tooltip">
+    <span class="tooltip-count" id="tooltip-count">0 contributions</span>
+    <span class="tooltip-date" id="tooltip-date">on Jan 1, 2024</span>
+  </div>
+  <script src="widget.js"></script>
+</body>
+</html>
