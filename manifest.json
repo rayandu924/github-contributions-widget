@@ -11,7 +11,7 @@
 
   "capabilities": {
     "hotReload": true,
-    "systemEvents": true
+    "systemEvents": ["viewport:resize", "theme:change", "visibility:change"]
   },
 
   "permissions": {
@@ -24,10 +24,13 @@
   },
 
   "oauth": {
-    "github": {
-      "required": true,
-      "scopes": ["read:user"]
-    }
+    "required": [
+      {
+        "provider": "github",
+        "scopes": ["read:user"],
+        "reason": "Required to fetch your contribution data"
+      }
+    ]
   },
 
   "defaultLayout": {

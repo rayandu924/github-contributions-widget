@@ -73,17 +73,12 @@
 </head>
 <body>
   <div class="background-layer" id="background"></div>
+  <!-- OAuth is handled by host app during addon installation -->
+  <!-- If we reach here without OAuth, show reinstall message -->
   <div class="state" id="state-auth">
     <div class="state-icon">🔐</div>
-    <div class="state-title">GitHub Authentication Required</div>
-    <div class="state-message">Connect your GitHub account to display your contribution graph.</div>
-    <button class="btn btn-primary" id="btn-connect">Connect GitHub</button>
-  </div>
-  <div class="state" id="state-scope">
-    <div class="state-icon">🔑</div>
-    <div class="state-title">Additional Permissions Needed</div>
-    <div class="state-message">This widget needs permission to read your GitHub profile and contributions.</div>
-    <button class="btn btn-primary" id="btn-scope">Grant Permissions</button>
+    <div class="state-title">GitHub Access Required</div>
+    <div class="state-message">Please reinstall this addon and grant GitHub access when prompted.</div>
   </div>
   <div class="state" id="state-loading">
     <div class="spinner"></div>
@@ -99,7 +94,7 @@
   <div class="container" id="container">
     <div class="header">
       <div class="user-info">
-        <img class="avatar" id="avatar" src="" alt="Avatar">
+        <img class="avatar" id="avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Avatar">
         <div>
           <div class="username" id="username">Loading...</div>
           <div class="year-label" id="year-label">2024</div>

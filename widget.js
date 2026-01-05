@@ -14,19 +14,17 @@
     year: new Date().getFullYear(),
     refreshTimer: null,
     isConnected: false,
-    hasRequiredScopes: false
+    hasRequiredScopes: false,
+    hasStoragePermission: false  // Track storage permission
   };
 
   // ==================== DOM Elements ====================
   var elements = {
     stateAuth: document.getElementById('state-auth'),
-    stateScope: document.getElementById('state-scope'),
     stateLoading: document.getElementById('state-loading'),
     stateError: document.getElementById('state-error'),
     container: document.getElementById('container'),
     background: document.getElementById('background'),
-    btnConnect: document.getElementById('btn-connect'),
-    btnScope: document.getElementById('btn-scope'),
     btnRetry: document.getElementById('btn-retry'),
     loadingMessage: document.getElementById('loading-message'),
     errorTitle: document.getElementById('error-title'),
@@ -68,7 +66,7 @@
 
   // ==================== UI State Helpers ====================
   function showState(stateName) {
-    ['stateAuth', 'stateScope', 'stateLoading', 'stateError', 'container'].forEach(function(s) {
+    ['stateAuth', 'stateLoading', 'stateError', 'container'].forEach(function(s) {
       var el = elements[s];
       if (el) {
         if (s === stateName) {
@@ -191,13 +189,17 @@
 
   // ==================== GitHub API ====================
   async function fetchUserProfile() {
-    var response = await api.network.fetch('https://api.github.com/user', {
+    // Use OAuth request for authenticated GitHub API calls
+    var response = await api.oauth.request('github', '/user', {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     });
+    if (response.error) {
+      throw new Error('GitHub API error: ' + response.error);
+    }
     if (!response.ok) {
       throw new Error('GitHub API error: ' + response.status);
     }
-    return await response.json();
+    return response.data;
   }
 
   async function fetchContributions(username, year) {
@@ -220,23 +222,28 @@
     var fromDate = year + '-01-01T00:00:00Z';
     var toDate = year + '-12-31T23:59:59Z';
 
-    var response = await api.network.fetch('https://api.github.com/graphql', {
+    // Use OAuth request for authenticated GitHub GraphQL API calls
+    // Note: body is already JSON-serialized by the proxy, don't stringify again
+    var response = await api.oauth.request('github', '/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/vnd.github.v3+json'
       },
-      body: JSON.stringify({
+      body: {
         query: query,
         variables: { username: username, from: fromDate, to: toDate }
-      })
+      }
     });
 
+    if (response.error) {
+      throw new Error('GitHub API error: ' + response.error);
+    }
     if (!response.ok) {
       throw new Error('GitHub API error: ' + response.status);
     }
 
-    var data = await response.json();
+    var data = response.data;
     if (data.errors) {
       throw new Error(data.errors[0] && data.errors[0].message || 'GraphQL query failed');
     }
@@ -385,7 +392,25 @@
   }
 
   // ==================== Data Management ====================
+
+  /**
+   * Request storage permission if not already granted
+   * Called once at initialization, silently succeeds/fails
+   */
+  async function ensureStoragePermission() {
+    if (state.hasStoragePermission) return true;
+    try {
+      state.hasStoragePermission = await api.requestPermission('storage', 'To cache your GitHub data and improve loading speed');
+      return state.hasStoragePermission;
+    } catch (error) {
+      console.warn('[GitHub Contributions] Storage permission request failed:', error);
+      return false;
+    }
+  }
+
   async function loadCachedData() {
+    // Skip if no storage permission - fail silently
+    if (!state.hasStoragePermission) return null;
     try {
       var cached = await api.storage.get('contributionData');
       if (cached && cached.timestamp) {
@@ -402,6 +427,8 @@
   }
 
   async function cacheData(user, contributions, year) {
+    // Skip if no storage permission - fail silently
+    if (!state.hasStoragePermission) return;
     try {
       await api.storage.set('contributionData', {
         user: user,
@@ -415,59 +442,37 @@
   }
 
   // ==================== Main Flow ====================
+  /**
+   * Check if OAuth is available.
+   * OAuth should already be granted during addon installation.
+   * If not available, show reinstall message (no in-addon auth UI).
+   */
   async function checkAuth() {
     try {
       state.isConnected = await api.oauth.isConnected('github');
       if (!state.isConnected) {
+        // OAuth not available - user needs to reinstall addon
+        console.warn('[GitHub Contributions] OAuth not connected. Addon requires reinstallation with OAuth permission.');
         showState('stateAuth');
         return false;
       }
 
+      // Check scopes (should be granted at install time)
       var scopes = await api.oauth.getScopes('github');
       state.hasRequiredScopes = scopes.includes('read:user');
 
       if (!state.hasRequiredScopes) {
-        showState('stateScope');
+        // Missing scopes - user needs to reinstall addon
+        console.warn('[GitHub Contributions] Missing required scopes. Addon requires reinstallation.');
+        showState('stateAuth');
         return false;
       }
 
       return true;
     } catch (error) {
       console.error('Auth check failed:', error);
-      showError('Authentication Error', 'Failed to check GitHub authentication status.');
+      showError('Authentication Error', 'Failed to check GitHub authentication status. Please reinstall the addon.');
       return false;
-    }
-  }
-
-  async function connectGitHub() {
-    try {
-      showLoading('Connecting to GitHub...');
-      var result = await api.oauth.request('github');
-      if (result.success) {
-        state.isConnected = true;
-        await loadData();
-      } else {
-        showState('stateAuth');
-      }
-    } catch (error) {
-      console.error('GitHub connection failed:', error);
-      showError('Connection Failed', 'Unable to connect to GitHub. Please try again.');
-    }
-  }
-
-  async function requestScopes() {
-    try {
-      showLoading('Requesting permissions...');
-      var granted = await api.oauth.requestScopes('github', ['read:user']);
-      if (granted) {
-        state.hasRequiredScopes = true;
-        await loadData();
-      } else {
-        showState('stateScope');
-      }
-    } catch (error) {
-      console.error('Scope request failed:', error);
-      showError('Permission Error', 'Unable to request additional permissions.');
     }
   }
 
@@ -514,6 +519,9 @@
 
     showState('container');
     setupRefreshTimer();
+
+    // Signal to host that visual render is complete
+    api.renderComplete();
   }
 
   function setupRefreshTimer() {
@@ -530,21 +538,20 @@
 
   // ==================== Event Handlers ====================
   function setupEventListeners() {
-    elements.btnConnect.addEventListener('click', connectGitHub);
-    elements.btnScope.addEventListener('click', requestScopes);
+    // Retry button - attempts to load data again (OAuth should already be available)
     elements.btnRetry.addEventListener('click', async function() {
       if (await checkAuth()) {
         await loadData();
       }
     });
 
-    api.on('theme:change', function() {
+    api.onEvent('theme:change', function() {
       if (state.contributions) {
         applyTheme(api.config);
       }
     });
 
-    api.on('visibility:change', function(data) {
+    api.onEvent('visibility:change', function(data) {
       if (data.hidden) {
         if (state.refreshTimer) {
           clearInterval(state.refreshTimer);
@@ -590,6 +597,9 @@
     console.log('[GitHub Contributions] Config:', api.config);
 
     setupEventListeners();
+
+    // Request storage permission for caching (optional, fails silently)
+    await ensureStoragePermission();
 
     if (await checkAuth()) {
       await loadData();
