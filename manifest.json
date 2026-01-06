@@ -51,8 +51,7 @@
   "settings": {
     "appearance": {
       "type": "section",
-      "label": "Appearance",
-      "default": "section"
+      "label": "Appearance"
     },
     "theme": {
       "type": "select",
@@ -117,8 +116,7 @@
     },
     "data": {
       "type": "section",
-      "label": "Data Settings",
-      "default": "section"
+      "label": "Data Settings"
     },
     "year": {
       "type": "select",
@@ -158,8 +156,7 @@
     },
     "layout": {
       "type": "section",
-      "label": "Layout",
-      "default": "section"
+      "label": "Layout"
     },
     "cellSize": {
       "type": "range",
@@ -187,8 +184,7 @@
     },
     "background": {
       "type": "section",
-      "label": "Background",
-      "default": "section"
+      "label": "Background"
     },
     "showBackground": {
       "type": "boolean",
