@@ -4,35 +4,43 @@
   "description": "Display your GitHub contribution graph - the famous green squares showing your daily commits and activity throughout the year.",
   "author": "MyWallpaper",
   "type": "widget",
-  "categories": ["productivity", "social", "developer"],
+  "categories": [
+    "productivity",
+    "social",
+    "developer"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/rayandu924/github-contributions-widget",
   "repository": "https://github.com/rayandu924/github-contributions-widget",
-
   "capabilities": {
     "hotReload": true,
-    "systemEvents": ["viewport:resize", "theme:change", "visibility:change"]
+    "systemEvents": [
+      "viewport:resize",
+      "theme:change",
+      "visibility:change"
+    ]
   },
-
   "permissions": {
     "storage": {
       "quota": 524288
     },
     "network": {
-      "domains": ["api.github.com"]
+      "domains": [
+        "api.github.com"
+      ]
     }
   },
-
   "oauth": {
     "required": [
       {
         "provider": "github",
-        "scopes": ["read:user"],
+        "scopes": [
+          "read:user"
+        ],
         "reason": "Required to fetch your contribution data"
       }
     ]
   },
-
   "defaultLayout": {
     "xPercent": 50,
     "yPercent": 80,
@@ -40,23 +48,44 @@
     "heightPercent": 20,
     "rotation": 0
   },
-
   "settings": {
     "appearance": {
       "type": "section",
-      "label": "Appearance"
+      "label": "Appearance",
+      "default": "section"
     },
     "theme": {
       "type": "select",
       "label": "Color Theme",
       "options": [
-        { "value": "github-green", "label": "GitHub Green (Classic)" },
-        { "value": "github-dark", "label": "GitHub Dark" },
-        { "value": "blue", "label": "Ocean Blue" },
-        { "value": "purple", "label": "Purple Rain" },
-        { "value": "orange", "label": "Sunset Orange" },
-        { "value": "pink", "label": "Pink Blossom" },
-        { "value": "custom", "label": "Custom Color" }
+        {
+          "value": "github-green",
+          "label": "GitHub Green (Classic)"
+        },
+        {
+          "value": "github-dark",
+          "label": "GitHub Dark"
+        },
+        {
+          "value": "blue",
+          "label": "Ocean Blue"
+        },
+        {
+          "value": "purple",
+          "label": "Purple Rain"
+        },
+        {
+          "value": "orange",
+          "label": "Sunset Orange"
+        },
+        {
+          "value": "pink",
+          "label": "Pink Blossom"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Color"
+        }
       ],
       "default": "github-green"
     },
@@ -88,17 +117,33 @@
     },
     "data": {
       "type": "section",
-      "label": "Data Settings"
+      "label": "Data Settings",
+      "default": "section"
     },
     "year": {
       "type": "select",
       "label": "Year to Display",
       "options": [
-        { "value": "current", "label": "Current Year" },
-        { "value": "2025", "label": "2025" },
-        { "value": "2024", "label": "2024" },
-        { "value": "2023", "label": "2023" },
-        { "value": "2022", "label": "2022" }
+        {
+          "value": "current",
+          "label": "Current Year"
+        },
+        {
+          "value": "2025",
+          "label": "2025"
+        },
+        {
+          "value": "2024",
+          "label": "2024"
+        },
+        {
+          "value": "2023",
+          "label": "2023"
+        },
+        {
+          "value": "2022",
+          "label": "2022"
+        }
       ],
       "default": "current"
     },
@@ -113,7 +158,8 @@
     },
     "layout": {
       "type": "section",
-      "label": "Layout"
+      "label": "Layout",
+      "default": "section"
     },
     "cellSize": {
       "type": "range",
@@ -141,7 +187,8 @@
     },
     "background": {
       "type": "section",
-      "label": "Background"
+      "label": "Background",
+      "default": "section"
     },
     "showBackground": {
       "type": "boolean",
