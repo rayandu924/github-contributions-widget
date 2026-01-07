@@ -1,6 +1,7 @@
 {
   "name": "GitHub Contributions",
   "version": "1.0.0",
+  "sdkVersion": "2.3.0",
   "description": "Display your GitHub contribution graph - the famous green squares showing your daily commits and activity throughout the year.",
   "author": "MyWallpaper",
   "type": "widget",
@@ -53,46 +54,15 @@
       "type": "section",
       "label": "Appearance"
     },
-    "theme": {
-      "type": "select",
-      "label": "Color Theme",
-      "options": [
-        {
-          "value": "github-green",
-          "label": "GitHub Green (Classic)"
-        },
-        {
-          "value": "github-dark",
-          "label": "GitHub Dark"
-        },
-        {
-          "value": "blue",
-          "label": "Ocean Blue"
-        },
-        {
-          "value": "purple",
-          "label": "Purple Rain"
-        },
-        {
-          "value": "orange",
-          "label": "Sunset Orange"
-        },
-        {
-          "value": "pink",
-          "label": "Pink Blossom"
-        },
-        {
-          "value": "custom",
-          "label": "Custom Color"
-        }
-      ],
-      "default": "github-green"
+    "showHeader": {
+      "type": "boolean",
+      "label": "Show Header",
+      "default": true
     },
-    "customColor": {
-      "type": "color",
-      "label": "Custom Base Color",
-      "default": "#39d353",
-      "description": "Used when theme is set to 'Custom Color'"
+    "showFooter": {
+      "type": "boolean",
+      "label": "Show Footer (Legend & Stats)",
+      "default": true
     },
     "showLabels": {
       "type": "boolean",
@@ -101,86 +71,42 @@
     },
     "showDayLabels": {
       "type": "boolean",
-      "label": "Show Day Labels (Mon, Wed, Fri)",
-      "default": true
-    },
-    "showTooltips": {
-      "type": "boolean",
-      "label": "Show Tooltips on Hover",
+      "label": "Show Day Labels",
       "default": true
     },
     "showStats": {
       "type": "boolean",
-      "label": "Show Stats Summary",
+      "label": "Show Stats",
       "default": true
     },
-    "data": {
+    "colors": {
       "type": "section",
-      "label": "Data Settings"
+      "label": "Contribution Colors"
     },
-    "year": {
-      "type": "select",
-      "label": "Year to Display",
-      "options": [
-        {
-          "value": "current",
-          "label": "Current Year"
-        },
-        {
-          "value": "2025",
-          "label": "2025"
-        },
-        {
-          "value": "2024",
-          "label": "2024"
-        },
-        {
-          "value": "2023",
-          "label": "2023"
-        },
-        {
-          "value": "2022",
-          "label": "2022"
-        }
-      ],
-      "default": "current"
+    "colorLevel0": {
+      "type": "color",
+      "label": "Empty (0)",
+      "default": "#161b22"
     },
-    "refreshInterval": {
-      "type": "range",
-      "label": "Refresh Interval (minutes)",
-      "min": 5,
-      "max": 60,
-      "step": 5,
-      "default": 30,
-      "description": "How often to fetch new contribution data"
+    "colorLevel1": {
+      "type": "color",
+      "label": "Low (1)",
+      "default": "#0e4429"
     },
-    "layout": {
-      "type": "section",
-      "label": "Layout"
+    "colorLevel2": {
+      "type": "color",
+      "label": "Medium (2)",
+      "default": "#006d32"
     },
-    "cellSize": {
-      "type": "range",
-      "label": "Cell Size (px)",
-      "min": 8,
-      "max": 20,
-      "step": 1,
-      "default": 12
+    "colorLevel3": {
+      "type": "color",
+      "label": "High (3)",
+      "default": "#26a641"
     },
-    "cellGap": {
-      "type": "range",
-      "label": "Cell Gap (px)",
-      "min": 1,
-      "max": 5,
-      "step": 1,
-      "default": 3
-    },
-    "borderRadius": {
-      "type": "range",
-      "label": "Cell Border Radius (px)",
-      "min": 0,
-      "max": 6,
-      "step": 1,
-      "default": 2
+    "colorLevel4": {
+      "type": "color",
+      "label": "Max (4)",
+      "default": "#39d353"
     },
     "background": {
       "type": "section",
@@ -192,25 +118,44 @@
       "default": true
     },
     "backgroundColor": {
-      "type": "color",
-      "label": "Background Color",
-      "default": "#0d1117"
-    },
-    "backgroundOpacity": {
-      "type": "range",
-      "label": "Background Opacity",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 80
+      "type": "gradient",
+      "label": "Background Style",
+      "default": "linear-gradient(135deg, #0d1117 0%, #161b22 100%)"
     },
     "backgroundBlur": {
       "type": "range",
-      "label": "Background Blur (px)",
+      "label": "Background Blur",
       "min": 0,
       "max": 20,
       "step": 1,
       "default": 10
+    },
+    "data": {
+      "type": "section",
+      "label": "Data Settings"
+    },
+    "displayMode": {
+      "type": "select",
+      "label": "Display Mode",
+      "options": [
+        {
+          "value": "year",
+          "label": "Full Year"
+        },
+        {
+          "value": "month",
+          "label": "Current Month"
+        }
+      ],
+      "default": "year"
+    },
+    "refreshInterval": {
+      "type": "range",
+      "label": "Refresh (min)",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "default": 30
     }
   }
 }

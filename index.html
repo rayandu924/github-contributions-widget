@@ -1,100 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GitHub Contributions</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-      color: #c9d1d9; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .state { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; width: 100%; height: 100%; }
-    .state.active { display: flex; }
-    .state-icon { font-size: 48px; }
-    .state-title { font-size: 18px; font-weight: 600; color: #f0f6fc; }
-    .state-message { font-size: 14px; color: #8b949e; max-width: 300px; }
-    .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
-    .btn-primary { background: #238636; color: #fff; }
-    .btn-primary:hover { background: #2ea043; }
-    .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
-    .btn-secondary:hover { background: #30363d; }
-    .spinner { width: 40px; height: 40px; border: 3px solid #30363d; border-top-color: #238636; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .container { display: none; flex-direction: column; gap: 12px; padding: 16px; width: 100%; height: 100%; }
-    .container.active { display: flex; }
-    .background-layer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; }
-    .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #30363d; }
-    .username { font-weight: 600; font-size: 14px; color: #f0f6fc; }
-    .year-label { font-size: 12px; color: #8b949e; }
-    .stats { display: flex; gap: 16px; flex-wrap: wrap; }
-    .stat { display: flex; align-items: baseline; gap: 4px; }
-    .stat-value { font-size: 16px; font-weight: 700; color: #f0f6fc; }
-    .stat-label { font-size: 12px; color: #8b949e; }
-    .graph-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-    .graph-container { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; padding: 4px; }
-    .graph-container::-webkit-scrollbar { height: 6px; }
-    .graph-container::-webkit-scrollbar-track { background: #21262d; border-radius: 3px; }
-    .graph-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-    .day-labels { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 0 0 0; font-size: 10px; color: #8b949e; min-width: 28px; }
-    .day-label { height: var(--cell-size, 12px); display: flex; align-items: center; }
-    .day-label:nth-child(even) { visibility: hidden; }
-    .graph { display: flex; gap: var(--cell-gap, 3px); }
-    .week { display: flex; flex-direction: column; gap: var(--cell-gap, 3px); }
-    .week-header { height: 16px; font-size: 10px; color: #8b949e; text-align: center; white-space: nowrap; }
-    .day { width: var(--cell-size, 12px); height: var(--cell-size, 12px); border-radius: var(--cell-radius, 2px); background: var(--level-0, #161b22); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; position: relative; }
-    .day:hover { transform: scale(1.2); box-shadow: 0 0 8px rgba(255,255,255,0.2); z-index: 10; }
-    .day.level-0 { background: var(--level-0); }
-    .day.level-1 { background: var(--level-1); }
-    .day.level-2 { background: var(--level-2); }
-    .day.level-3 { background: var(--level-3); }
-    .day.level-4 { background: var(--level-4); }
-    .tooltip { display: none; position: fixed; padding: 8px 12px; background: #1c2128; border: 1px solid #30363d; border-radius: 6px; font-size: 12px; color: #f0f6fc; pointer-events: none; z-index: 1000; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-    .tooltip.visible { display: block; }
-    .tooltip-count { font-weight: 700; }
-    .tooltip-date { color: #8b949e; margin-left: 4px; }
-    .legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #8b949e; margin-top: auto; padding-top: 8px; }
-    .legend-squares { display: flex; gap: 3px; }
-    .legend-square { width: 10px; height: 10px; border-radius: 2px; }
-    .theme-github-green { --level-0: #161b22; --level-1: #0e4429; --level-2: #006d32; --level-3: #26a641; --level-4: #39d353; }
-    .theme-github-dark { --level-0: #161b22; --level-1: #1e3a2f; --level-2: #2d5a44; --level-3: #3d7a59; --level-4: #4d9a6e; }
-    .theme-blue { --level-0: #161b22; --level-1: #0a3069; --level-2: #0550ae; --level-3: #0969da; --level-4: #54aeff; }
-    .theme-purple { --level-0: #161b22; --level-1: #3d1a5c; --level-2: #6e40aa; --level-3: #9d4edd; --level-4: #c77dff; }
-    .theme-orange { --level-0: #161b22; --level-1: #5c2d0e; --level-2: #9a4a1c; --level-3: #d4682a; --level-4: #ff9f43; }
-    .theme-pink { --level-0: #161b22; --level-1: #5c1a3d; --level-2: #9a2d66; --level-3: #d44190; --level-4: #ff6eb4; }
-    .error-icon { color: #f85149; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .container.active { animation: fadeIn 0.3s ease-out; }
-    .day { animation: fadeIn 0.2s ease-out backwards; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--fg);
+      background: transparent;
+    }
+
+    /* States */
+    .state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .state.active {
+      display: flex;
+    }
+
+    .state-icon {
+      font-size: 32px;
+    }
+
+    .state-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .state-message {
+      font-size: 11px;
+      color: #8b949e;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #238636;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 2px solid #30363d;
+      border-top-color: #238636;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-icon {
+      color: #f85149;
+    }
+
+    /* Container - ALL sizes from CSS variables */
+    .container {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: var(--padding, 8px);
+    }
+
+    .container.active {
+      display: flex;
+    }
+
+    .background-layer {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Header - responsive height */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      height: var(--header-height, 36px);
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: var(--label-font-size, 10px);
+      color: var(--fg);
+    }
+
+    .year-label {
+      font-size: calc(var(--label-font-size, 10px) * 0.8);
+      color: #8b949e;
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+
+    .stat-value {
+      font-size: var(--label-font-size, 10px);
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .stat-label {
+      font-size: calc(var(--label-font-size, 10px) * 0.7);
+      color: #8b949e;
+    }
+
+    /* Graph wrapper - fills remaining space */
+    .graph-wrapper {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .graph-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Day labels - responsive width */
+    .day-labels {
+      display: flex;
+      flex-direction: column;
+      gap: var(--cell-gap, 2px);
+      width: var(--day-labels-width, 24px);
+      flex-shrink: 0;
+      padding-top: var(--week-header-height, 0px);
+    }
+
+    .day-label {
+      height: var(--cell-height, 10px);
+      font-size: var(--label-font-size, 8px);
+      color: #8b949e;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 3px;
+    }
+
+    .day-label:nth-child(even) {
+      visibility: hidden;
+    }
+
+    /* Graph grid - fills all space */
+    .graph {
+      display: flex;
+      gap: var(--cell-gap, 2px);
+      flex: 1;
+    }
+
+    .week {
+      display: flex;
+      flex-direction: column;
+      gap: var(--cell-gap, 2px);
+      flex: 1;
+    }
+
+    .week-header {
+      height: var(--week-header-height, 0px);
+      font-size: var(--label-font-size, 8px);
+      color: #8b949e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .day {
+      width: 100%;
+      height: var(--cell-height, 10px);
+      border-radius: var(--cell-radius, 2px);
+      background: var(--level-0);
+      cursor: pointer;
+      transition: opacity 0.1s;
+      flex-shrink: 0;
+    }
+
+    .day:hover {
+      opacity: 0.75;
+    }
+
+    .day.level-0 {
+      background: var(--level-0);
+    }
+
+    .day.level-1 {
+      background: var(--level-1);
+    }
+
+    .day.level-2 {
+      background: var(--level-2);
+    }
+
+    .day.level-3 {
+      background: var(--level-3);
+    }
+
+    .day.level-4 {
+      background: var(--level-4);
+    }
+
+    /* Footer - responsive height */
+    .legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: var(--footer-height, 20px);
+      flex-shrink: 0;
+      font-size: var(--label-font-size, 8px);
+      color: #8b949e;
+    }
+
+    .legend-squares {
+      display: flex;
+      gap: 2px;
+    }
+
+    .legend-square {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      display: none;
+      position: fixed;
+      padding: 4px 8px;
+      background: #1c2128;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #f0f6fc;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .tooltip.visible {
+      display: block;
+    }
+
+    .tooltip-count {
+      font-weight: 700;
+    }
+
+    .tooltip-date {
+      color: #8b949e;
+      margin-left: 3px;
+    }
+
+    /* CSS Variables */
+    :root {
+      --level-0: var(--mw-config-colorLevel0, #161b22);
+      --level-1: var(--mw-config-colorLevel1, #0e4429);
+      --level-2: var(--mw-config-colorLevel2, #006d32);
+      --level-3: var(--mw-config-colorLevel3, #26a641);
+      --level-4: var(--mw-config-colorLevel4, #39d353);
+      --cell-width: 10px;
+      --cell-height: 10px;
+      --cell-gap: 2px;
+      --cell-radius: 2px;
+      --week-header-height: 0px;
+      --day-labels-width: 24px;
+      --label-font-size: 8px;
+      --header-height: 36px;
+      --footer-height: 20px;
+      --padding: 8px;
+      --bg: var(--mw-theme-background, #0d1117);
+      --fg: var(--mw-theme-foreground, #c9d1d9);
+      --border-color: var(--mw-theme-border, #30363d);
+    }
   </style>
 </head>
+
 <body>
   <div class="background-layer" id="background"></div>
-  <!-- OAuth is handled by host app during addon installation -->
-  <!-- If we reach here without OAuth, show reinstall message -->
   <div class="state" id="state-auth">
     <div class="state-icon">🔐</div>
     <div class="state-title">GitHub Access Required</div>
-    <div class="state-message">Please reinstall this addon and grant GitHub access when prompted.</div>
+    <div class="state-message">Reinstall and grant access</div>
   </div>
   <div class="state" id="state-loading">
     <div class="spinner"></div>
-    <div class="state-title">Loading contributions...</div>
-    <div class="state-message" id="loading-message">Fetching your GitHub data</div>
+    <div class="state-title">Loading...</div>
+    <div class="state-message" id="loading-message">Fetching data</div>
   </div>
   <div class="state" id="state-error">
     <div class="state-icon error-icon">⚠️</div>
-    <div class="state-title" id="error-title">Something went wrong</div>
-    <div class="state-message" id="error-message">Unable to load contribution data.</div>
+    <div class="state-title" id="error-title">Error</div>
+    <div class="state-message" id="error-message">Unable to load</div>
     <button class="btn btn-secondary" id="btn-retry">Retry</button>
   </div>
   <div class="container" id="container">
     <div class="header">
       <div class="user-info">
-        <img class="avatar" id="avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Avatar">
+        <img class="avatar" id="avatar"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
         <div>
           <div class="username" id="username">Loading...</div>
           <div class="year-label" id="year-label">2024</div>
@@ -103,7 +374,7 @@
       <div class="stats" id="stats"></div>
     </div>
     <div class="graph-wrapper">
-      <div class="graph-container">
+      <div class="graph-container" id="graph-container">
         <div class="day-labels" id="day-labels"></div>
         <div class="graph" id="graph"></div>
       </div>
@@ -115,9 +386,10 @@
     </div>
   </div>
   <div class="tooltip" id="tooltip">
-    <span class="tooltip-count" id="tooltip-count">0 contributions</span>
-    <span class="tooltip-date" id="tooltip-date">on Jan 1, 2024</span>
+    <span class="tooltip-count" id="tooltip-count">0</span>
+    <span class="tooltip-date" id="tooltip-date">Jan 1</span>
   </div>
   <script src="widget.js"></script>
 </body>
+
 </html>
