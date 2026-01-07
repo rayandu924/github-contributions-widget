@@ -5,47 +5,40 @@ A beautiful widget addon for [MyWallpaper](https://mywallpaper.online) that disp
 ![GitHub Contributions Widget Preview](preview.png)
 
 ## Features
-
-- **Real GitHub Data**: Fetches your actual contribution data via GitHub's GraphQL API
-- **OAuth Integration**: Secure authentication through MyWallpaper's OAuth proxy (your tokens are never exposed)
-- **Multiple Themes**: Choose from 6 built-in themes or create your own custom color scheme
-- **Hot Reload**: Settings changes apply instantly without reloading
-- **Data Caching**: Contributions are cached to reduce API calls
-- **Responsive**: Automatically adapts to different widget sizes
-- **Year Selection**: View contributions from current year or past years
-
-## Settings
-
-### Appearance
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Theme | Color scheme for the contribution squares | GitHub Green |
-| Custom Color | Base color when using custom theme | #39d353 |
-| Show Month Labels | Display month names above the graph | Yes |
-| Show Day Labels | Display day names (Mon, Wed, Fri) | Yes |
-| Show Tooltips | Show contribution count on hover | Yes |
-| Show Stats | Display contribution statistics | Yes |
-
-### Layout
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Cell Size | Size of each contribution square (px) | 12 |
-| Cell Gap | Space between squares (px) | 3 |
-| Border Radius | Roundness of squares (px) | 2 |
-
-### Background
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Show Background | Enable background layer | Yes |
-| Background Color | Color of the background | #0d1117 |
-| Background Opacity | Transparency level (%) | 80 |
-| Background Blur | Blur effect intensity (px) | 10 |
-
-### Data
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Year | Which year to display | Current |
-| Refresh Interval | How often to fetch new data (minutes) | 30 |
+ 
+ - **Real GitHub Data**: Fetches your actual contribution data via GitHub's GraphQL API
+ - **OAuth Integration**: Secure authentication through MyWallpaper's OAuth proxy (your tokens are never exposed)
+ - **True Responsiveness**: Widget adapts to any size, with cells scaling proportionally (square or rectangular)
+ - **Display Modes**: Choose between "Full Year" view or detailed "Current Month" view
+ - **Multiple Themes**: Choose from built-in themes or create your own custom color scheme
+ - **Hot Reload**: Settings changes apply instantly
+ - **Data Caching**: Contributions are cached to reduce API calls
+ 
+ ## Settings
+ 
+ ### Data Settings
+ | Setting | Description | Default |
+ |---------|-------------|---------|
+ | Display Mode | "Full Year" (53 weeks) or "Current Month" (4-5 weeks) | Full Year |
+ | Refresh Interval | How often to fetch new data (minutes) | 30 |
+ 
+ ### Appearance
+ | Setting | Description | Default |
+ |---------|-------------|---------|
+ | Theme | Color scheme for the contribution squares | GitHub Green |
+ | Custom Color | Base color when using custom theme | #39d353 |
+ | Show Month Labels | Display month names above the graph | Yes |
+ | Show Day Labels | Display day names (Mon, Wed, Fri) | Yes |
+ | Show Tooltips | Show contribution count on hover | Yes |
+ | Show Stats | Display contribution statistics | Yes |
+ 
+ ### Background
+ | Setting | Description | Default |
+ |---------|-------------|---------|
+ | Show Background | Enable background layer | Yes |
+ | Background Color | Color of the background | #0d1117 |
+ | Background Opacity | Transparency level (%) | 80 |
+ | Background Blur | Blur effect intensity (px) | 10 |
 
 ## Color Themes
 

@@ -446,12 +446,30 @@
 
     window.addEventListener('message', function (event) {
       if (event.data && event.data.type === 'SETTINGS_UPDATE') {
-        applyVisuals(api.config);
+        var newConfig = api ? api.config : {};
+        var oldDisplayMode = state.displayMode;
+        var oldYear = state.year;
+
+        applyVisuals(newConfig);
+
         if (state.contributions) {
-          var y = api.config.year || 'current';
+          var y = newConfig.year || 'current';
           var ny = y === 'current' ? new Date().getFullYear() : parseInt(y, 10);
-          if (ny !== state.year) loadData();
-          else renderGraph(state.contributions, api.config);
+
+          // Only reload data if year changed
+          if (ny !== oldYear) {
+            loadData();
+          }
+          // Only re-render graph if structural settings changed
+          else if (
+            newConfig.displayMode !== oldDisplayMode ||
+            newConfig.showLabels !== (elements.dayLabels.style.display !== 'none') || // approximate check
+            newConfig.showDayLabels !== (elements.dayLabels.style.display !== 'none') // approximate check
+          ) {
+            renderGraph(state.contributions, newConfig);
+          }
+          // Note:Color changes (colorLevelX) are handled automatically by CSS variables
+          // injected by the host, so no re-render is needed for them!
         }
       }
     });
