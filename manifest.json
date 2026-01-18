@@ -1,7 +1,7 @@
 {
   "name": "GitHub Contributions",
   "version": "1.0.1",
-  "sdkVersion": "2.8.0",
+  "sdkVersion": "2.8.1",
   "description": "Display your GitHub contribution graph - the famous green squares showing your daily commits and activity throughout the year.",
   "author": "MyWallpaper",
   "type": "widget",
